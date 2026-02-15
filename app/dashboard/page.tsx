@@ -7,11 +7,12 @@ import { ProfileMenu } from '@/components/dashboard/profile-menu'
 import { EditPanel } from '@/components/dashboard/edit-panel'
 import { useBlockEditor } from '@/lib/store/block-editor'
 import { useEffect, useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Loader2, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
+import { motion } from 'framer-motion'
 
 // Dynamically import factory monitor
 const FactoryMonitor = dynamic(
@@ -33,9 +34,9 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
-  // Fetch user and their projects
+  // Fetch user and their projects - SINGLE useEffect
   useEffect(() => {
     async function loadUserAndProjects() {
       try {
@@ -49,50 +50,19 @@ export default function DashboardPage() {
 
         setUser(user)
 
-        // Fetch user's projects
+        // Fetch user's projects from real database
         const { data: projectsData, error } = await supabase
           .from('projects')
           .select('*')
           .eq('user_id', user.id)
           .order('updated_at', { ascending: false })
 
-        if (error) throw error
-
-        setProjects(projectsData || [])
-      } catch (error) {
-        console.error('Error loading projects:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadUserAndProjects()
-  }, [supabase, router])
-
-  // Fetch user and their projects
-  useEffect(() => {
-    async function loadUserAndProjects() {
-      try {
-        // Get current user
-        const { data: { user } } = await supabase.auth.getUser()
-        
-        if (!user) {
-          router.push('/login')
-          return
+        if (error) {
+          console.error('Error fetching projects:', error)
+          setProjects([])
+        } else {
+          setProjects(projectsData || [])
         }
-
-        setUser(user)
-
-        // Fetch user's projects
-        const { data: projectsData, error } = await supabase
-          .from('projects')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('updated_at', { ascending: false })
-
-        if (error) throw error
-
-        setProjects(projectsData || [])
       } catch (error) {
         console.error('Error loading projects:', error)
       } finally {
@@ -101,7 +71,7 @@ export default function DashboardPage() {
     }
 
     loadUserAndProjects()
-  }, [supabase, router])
+  }, [router])
 
   // Loading state
   if (isLoading) {

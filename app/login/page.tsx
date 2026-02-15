@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
@@ -12,8 +12,9 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const getRedirectUrl = () => {
     if (typeof window !== 'undefined') {
@@ -50,15 +51,37 @@ export default function LoginPage() {
     try {
       setLoading(true)
       setError(null)
+      setSuccess(null)
       
-      const { error } = await supabase.auth.signInWithPassword({
+      // First, try to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
       
-      if (error) throw error
+      // If sign in works, redirect
+      if (!signInError) {
+        router.push('/dashboard')
+        return
+      }
       
-      router.push('/dashboard')
+      // If user doesn't exist, automatically sign them up
+      if (signInError.message.includes('Invalid login credentials')) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+        })
+        
+        if (signUpError) throw signUpError
+        
+        setSuccess('Account created! Please check your email to verify.')
+        setLoading(false)
+        return
+      }
+      
+      // Other errors
+      throw signInError
+      
     } catch (error: any) {
       setError(error.message)
       setLoading(false)
@@ -105,6 +128,13 @@ export default function LoginPage() {
             {error && (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
                 {error}
+              </div>
+            )}
+            
+            {/* Success message */}
+            {success && (
+              <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
+                {success}
               </div>
             )}
 

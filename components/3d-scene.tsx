@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, Suspense } from 'react'
+import { useRef, Suspense, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { MeshTransmissionMaterial, Environment } from '@react-three/drei'
 
@@ -38,8 +38,29 @@ function GlassIcosahedron() {
   )
 }
 
-// Main 3D Scene Component
+// Main 3D Scene Component with crash protection
 export function Scene3D() {
+  const [mounted, setMounted] = useState(false)
+  const [hasError, setHasError] = useState(false)
+
+  useEffect(() => {
+    // Only mount on client side
+    if (typeof window !== 'undefined') {
+      setMounted(true)
+    }
+  }, [])
+
+  // Fallback if WebGL fails
+  if (!mounted || hasError) {
+    return (
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/30 via-black to-pink-900/30" />
+        <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 -right-40 w-96 h-96 bg-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+    )
+  }
+
   return (
     <div className="fixed inset-0 -z-10">
       <Canvas
@@ -47,6 +68,15 @@ export function Scene3D() {
         className="bg-transparent"
         gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
         dpr={[1, 2]}
+        onCreated={(state) => {
+          // Test WebGL support
+          try {
+            state.gl.getContext()
+          } catch (e) {
+            console.error('WebGL not supported:', e)
+            setHasError(true)
+          }
+        }}
       >
         <Suspense fallback={null}>
           {/* Realistic city reflections */}
