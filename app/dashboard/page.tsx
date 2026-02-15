@@ -71,7 +71,91 @@ export default function DashboardPage() {
     }
 
     loadUserAndProjects()
-  }, [router])
+  }, [router, supabase])
+
+  // Initialize with mock blocks on mount (for projects that exist)
+  useEffect(() => {
+    if (projects.length > 0) {
+      const mockBlocks = [
+        {
+          id: 'navbar-1',
+          name: 'Main Navigation',
+          type: 'navbar',
+          order: 0,
+          config: {
+            brandName: 'Svarnex',
+            brandColor: '#8B5CF6',
+            buttonColor: '#EC4899',
+            ctaText: 'Get Started',
+            backgroundColor: '#FFFFFF',
+          },
+        },
+        {
+          id: 'hero-1',
+          name: 'Hero Section',
+          type: 'hero',
+          order: 1,
+          config: {
+            title: 'Build Websites in Minutes',
+            subtitle: 'The AI-powered website builder that does the work for you',
+            ctaText: 'Start Building',
+            ctaColor: '#8B5CF6',
+            backgroundColor: '#F9FAFB',
+            titleColor: '#111827',
+            subtitleColor: '#6B7280',
+          },
+        },
+        {
+          id: 'features-1',
+          name: 'Features Grid',
+          type: 'features',
+          order: 2,
+          config: {
+            heading: 'Why Choose Svarnex?',
+            headingColor: '#111827',
+            iconColor: '#8B5CF6',
+            features: [
+              { title: 'AI-Powered', description: 'Generate components with AI' },
+              { title: 'Lightning Fast', description: 'Build websites in minutes' },
+              { title: 'Fully Customizable', description: 'Edit every detail' },
+            ],
+          },
+        },
+        {
+          id: 'pricing-1',
+          name: 'Pricing Table',
+          type: 'pricing',
+          order: 3,
+          config: {
+            heading: 'Simple Pricing',
+            backgroundColor: '#F9FAFB',
+            borderColor: '#E5E7EB',
+            buttonColor: '#8B5CF6',
+            plans: [
+              { name: 'Starter', price: '₹199', features: ['100 Credits', '5 Projects', 'Basic Support'] },
+              { name: 'Pro', price: '₹499', features: ['500 Credits', 'Unlimited Projects', 'Priority Support'] },
+              { name: 'Empire', price: '₹799', features: ['Unlimited Credits', 'Unlimited Projects', '24/7 Support'] },
+            ],
+          },
+        },
+        {
+          id: 'footer-1',
+          name: 'Footer',
+          type: 'footer',
+          order: 4,
+          config: {
+            brandName: 'Svarnex',
+            brandColor: '#FFFFFF',
+            backgroundColor: '#111827',
+            description: 'Build the future, one block at a time.',
+            copyright: '© 2026 Svarnex. All rights reserved.',
+          },
+        },
+      ]
+
+      setBlocks(mockBlocks)
+    }
+  }, [projects.length, setBlocks])
 
   // Loading state
   if (isLoading) {
@@ -121,7 +205,7 @@ export default function DashboardPage() {
                     Welcome to Svarnex
                   </h1>
                   <p className="text-xl text-gray-400">
-                    You haven't created any projects yet. Let's build your first website!
+                    You haven&apos;t created any projects yet. Let&apos;s build your first website!
                   </p>
                 </div>
 
@@ -163,88 +247,7 @@ export default function DashboardPage() {
     )
   }
 
-  // Has projects - show full dashboard with mock blocks for editor
-  // Initialize with mock blocks on mount
-  useEffect(() => {
-    const mockBlocks = [
-      {
-        id: 'navbar-1',
-        name: 'Main Navigation',
-        type: 'navbar',
-        order: 0,
-        config: {
-          brandName: 'Svarnex',
-          brandColor: '#8B5CF6',
-          buttonColor: '#EC4899',
-          ctaText: 'Get Started',
-          backgroundColor: '#FFFFFF',
-        },
-      },
-      {
-        id: 'hero-1',
-        name: 'Hero Section',
-        type: 'hero',
-        order: 1,
-        config: {
-          title: 'Build Websites in Minutes',
-          subtitle: 'The AI-powered website builder that does the work for you',
-          ctaText: 'Start Building',
-          ctaColor: '#8B5CF6',
-          backgroundColor: '#F9FAFB',
-          titleColor: '#111827',
-          subtitleColor: '#6B7280',
-        },
-      },
-      {
-        id: 'features-1',
-        name: 'Features Grid',
-        type: 'features',
-        order: 2,
-        config: {
-          heading: 'Why Choose Svarnex?',
-          headingColor: '#111827',
-          iconColor: '#8B5CF6',
-          features: [
-            { title: 'AI-Powered', description: 'Generate components with AI' },
-            { title: 'Lightning Fast', description: 'Build websites in minutes' },
-            { title: 'Fully Customizable', description: 'Edit every detail' },
-          ],
-        },
-      },
-      {
-        id: 'pricing-1',
-        name: 'Pricing Table',
-        type: 'pricing',
-        order: 3,
-        config: {
-          heading: 'Simple Pricing',
-          backgroundColor: '#F9FAFB',
-          borderColor: '#E5E7EB',
-          buttonColor: '#8B5CF6',
-          plans: [
-            { name: 'Starter', price: '₹199', features: ['100 Credits', '5 Projects', 'Basic Support'] },
-            { name: 'Pro', price: '₹499', features: ['500 Credits', 'Unlimited Projects', 'Priority Support'] },
-            { name: 'Empire', price: '₹799', features: ['Unlimited Credits', 'Unlimited Projects', '24/7 Support'] },
-          ],
-        },
-      },
-      {
-        id: 'footer-1',
-        name: 'Footer',
-        type: 'footer',
-        order: 4,
-        config: {
-          brandName: 'Svarnex',
-          brandColor: '#FFFFFF',
-          backgroundColor: '#111827',
-          description: 'Build the future, one block at a time.',
-          copyright: '© 2026 Svarnex. All rights reserved.',
-        },
-      },
-    ]
-
-    setBlocks(mockBlocks)
-  }, [setBlocks])
+  // Has projects - show full dashboard
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Background gradient */}
